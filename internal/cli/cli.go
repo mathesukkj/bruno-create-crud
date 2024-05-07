@@ -21,10 +21,7 @@ func Cli(args []string) {
 	actions := []string{"list", "create", "show", "update", "delete"}
 
 	for i := range 5 {
-		name := args[0]
-		if i == 0 {
-			name = name + "s"
-		}
+		name := args[0] + "s"
 
 		f, err := os.Create(fmt.Sprintf("%s %s.bru", actions[i], name))
 		if err != nil {
@@ -40,21 +37,19 @@ func Cli(args []string) {
 }
 
 func Meta(action, name string, seq int) string {
-	return fmt.Sprintf(`
-    meta {
-      name: %s %s
-      type http
-      seq: %d
-    }
+	return fmt.Sprintf(`meta {
+  name: %s %s
+  type: http
+  seq: %d
+}
   `, action, name, seq)
 }
 
 func Method(method, url, name, path string) string {
-	return fmt.Sprintf(`
-    %s {
-      url: %s/%s%s
-      body: none
-      auth: none
-    }
+	return fmt.Sprintf(`%s {
+  url: %s/%s%s
+  body: none
+  auth: none
+}
   `, method, url, name, path)
 }
