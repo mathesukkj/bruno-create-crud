@@ -53,29 +53,50 @@ func run(args []string) {
 	actions := []string{"List", "Create", "Show", "Update", "Delete"}
 
 	for i := range len(actions) {
-		name := getFormattedName(strings.Title(args[0]), actions[i])
+		fileContent := generateFileContents(args[0], url, methods[i], paths[i], actions[i], headers)
+		filename := fmt.Sprintf(
+			"%s %s.bru",
+			actions[i],
+			formatName(strings.Title(args[0]), actions[i]),
+		)
 
-		f, err := os.Create(fmt.Sprintf("%s %s.bru", actions[i], name))
+		f, err := os.Create(filename)
 		if err != nil {
 			panic(err)
 		}
 
-		meta := blocks.Meta(actions[i], name, i)
-		f.Write([]byte(meta))
-
-		data := blocks.Method(methods[i], url, strings.ToLower(name), paths[i])
-		f.Write([]byte(data))
-
-		if len(headers) > 0 {
-			headersBlock := blocks.Headers(headers)
-			f.Write([]byte(headersBlock))
+		_, err = f.WriteString(fileContent)
+		if err != nil {
+			panic(err)
 		}
-
-		f.Write([]byte("\n"))
 	}
 }
 
-func getFormattedName(name, action string) string {
+func generateFileContents(
+	entity, url string,
+	method string,
+	path string,
+	action string,
+	headers map[string]string,
+) string {
+	var fileContents strings.Builder
+
+	name := formatName(strings.Title(entity), action)
+	meta := blocks.Meta(action, name, 0)
+	fileContents.WriteString(meta)
+
+	data := blocks.Method(method, url, strings.ToLower(name), path)
+	fileContents.WriteString(data)
+
+	if len(headers) > 0 {
+		headersBlock := blocks.Headers(headers)
+		fileContents.WriteString(headersBlock)
+	}
+
+	return fileContents.String()
+}
+
+func formatName(name, action string) string {
 	if action == "List" {
 		if string(name[len(name)-1]) == "y" {
 			return string(name[0:len(name)-1]) + "ies"

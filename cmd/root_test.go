@@ -96,3 +96,39 @@ func TestMapHeaders(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerateFileContents(t *testing.T) {
+	headers := map[string]string{
+		"Content-Type":  "application/json",
+		"Authorization": "BearerToken",
+	}
+
+	expected := `meta {
+  name: List Entities
+  type: http
+  seq: 0
+}
+
+get {
+  url: http://example.com/entities
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+  Authorization: BearerToken
+}`
+
+	result := generateFileContents(
+		"entity",
+		"http://example.com",
+		"get",
+		"",
+		"List",
+		headers,
+	)
+	if result != expected {
+		t.Errorf("got '%s', expected '%s'", result, expected)
+	}
+}
