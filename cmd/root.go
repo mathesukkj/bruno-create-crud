@@ -1,5 +1,5 @@
 /*
-Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+Copyright © 2024 Matheus Kemuel <kemuel.g7363@gmail.com>
 */
 package cmd
 
@@ -19,33 +19,10 @@ var rootCmd = &cobra.Command{
 	Use:   "bcrud",
 	Short: "A tool for quickly creating Bruno requests, such as POST, GET, PUT...all directly in your terminal!",
 	Args: func(cmd *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("no entity name provided")
-		}
-
-		if len(args) < 2 {
-			return errors.New("url not provided")
-		}
-
-		return nil
+		return checkArgs(args)
 	},
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		args[1] = strings.TrimSuffix(args[1], "/")
-
-		if headersStr == "" {
-			return nil
-		}
-
-		headersArr := strings.Split(headersStr, ":")
-		if len(headersArr) == 1 || len(headersArr)%2 != 0 {
-			return errors.New("headers in wrong format!! use key:value")
-		}
-
-		for i := 0; i < len(headersArr); i += 2 {
-			headers[headersArr[i]] = headersArr[i+1]
-		}
-
-		return nil
+		return preRun(args)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		url := args[1]
@@ -103,4 +80,39 @@ func getFormattedName(name, action string) string {
 	}
 
 	return name
+}
+
+func checkArgs(args []string) error {
+	if len(args) < 1 {
+		return errors.New("no entity name provided")
+	}
+
+	if len(args) < 2 {
+		return errors.New("url not provided")
+	}
+
+	return nil
+}
+
+func preRun(args []string) error {
+	args[1] = strings.TrimSuffix(args[1], "/")
+
+	if headersStr == "" {
+		return nil
+	}
+
+	return mapHeaders(headersStr)
+}
+
+func mapHeaders(headersStr string) error {
+	headersArr := strings.Split(headersStr, ":")
+	if len(headersArr) == 1 || len(headersArr)%2 != 0 {
+		return errors.New("headers in wrong format!! use key:value")
+	}
+
+	for i := 0; i < len(headersArr); i += 2 {
+		headers[headersArr[i]] = headersArr[i+1]
+	}
+
+	return nil
 }
