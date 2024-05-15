@@ -1,11 +1,10 @@
+/*
+Copyright © 2024 Matheus Kemuel <kemuel.g7363@gmail.com>
+*/
 package main
 
-import (
-	"os"
-
-	"github.com/mathesukkj/gocat/internal/cli"
-)
+import "github.com/mathesukkj/gocat/cmd"
 
 func main() {
-	cli.Cli(os.Args[1:])
+	cmd.Execute()
 }
