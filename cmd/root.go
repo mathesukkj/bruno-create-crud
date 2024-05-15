@@ -11,7 +11,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/mathesukkj/gocat/internal/blocks"
+	"github.com/mathesukkj/bruno-create-crud/internal/blocks"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -25,32 +25,7 @@ var rootCmd = &cobra.Command{
 		return preRun(args)
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		url := args[1]
-		methods := []string{"get", "post", "get", "put", "delete"}
-		paths := []string{"/", "/", "/1", "/1", "/1"}
-		actions := []string{"List", "Create", "Show", "Update", "Delete"}
-
-		for i := range len(actions) {
-			name := getFormattedName(strings.Title(args[0]), actions[i])
-
-			f, err := os.Create(fmt.Sprintf("%s %s.bru", actions[i], name))
-			if err != nil {
-				panic(err)
-			}
-
-			meta := blocks.Meta(actions[i], name, i)
-			f.Write([]byte(meta))
-
-			data := blocks.Method(methods[i], url, strings.ToLower(name), paths[i])
-			f.Write([]byte(data))
-
-			if len(headers) > 0 {
-				headersBlock := blocks.Headers(headers)
-				f.Write([]byte(headersBlock))
-			}
-
-			f.Write([]byte("\n"))
-		}
+		run(args)
 	},
 }
 
@@ -69,6 +44,35 @@ func init() {
 
 	rootCmd.PersistentFlags().
 		StringVarP(&headersStr, "header", "H", "", "add headers to the request")
+}
+
+func run(args []string) {
+	url := args[1]
+	methods := []string{"get", "post", "get", "put", "delete"}
+	paths := []string{"/", "/", "/1", "/1", "/1"}
+	actions := []string{"List", "Create", "Show", "Update", "Delete"}
+
+	for i := range len(actions) {
+		name := getFormattedName(strings.Title(args[0]), actions[i])
+
+		f, err := os.Create(fmt.Sprintf("%s %s.bru", actions[i], name))
+		if err != nil {
+			panic(err)
+		}
+
+		meta := blocks.Meta(actions[i], name, i)
+		f.Write([]byte(meta))
+
+		data := blocks.Method(methods[i], url, strings.ToLower(name), paths[i])
+		f.Write([]byte(data))
+
+		if len(headers) > 0 {
+			headersBlock := blocks.Headers(headers)
+			f.Write([]byte(headersBlock))
+		}
+
+		f.Write([]byte("\n"))
+	}
 }
 
 func getFormattedName(name, action string) string {
